@@ -1,0 +1,5 @@
+---
+
+- template: src=mit-phpmyadmin.include dest=/etc/nginx/conf.d/mit-phpmyadmin.include
+  notify: Restart nginx  
+
