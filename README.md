@@ -1,0 +1,1 @@
+# mit.nginx.phpmyadmin
