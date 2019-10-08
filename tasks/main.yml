@@ -1,5 +1,31 @@
 ---
 
+- name: rsync phpmyadmin
+  synchronize:
+    src: files/phpMyAdmin-4.9.0.1-all-languages/
+    dest: /usr/local/share/phpmyadmin/
+    owner: no
+
+- name: Create /usr/local/etc/phpmyadmin/conf.d/
+  file: state=directory path=/usr/local/etc/phpmyadmin/conf.d/
+
+- stat: path=/usr/local/etc/phpmyadmin/conf.d/blowfish_secret.inc.php
+  register: blowfish_secret_file
+
+- name: Create blowfish_secret
+  shell: openssl rand -base64 32 | cut -b -32
+  register: blowfish_secret
+  when: blowfish_secret_file.stat.exists == False
+
+- name: Create blowfish_secret.inc.php
+  copy:
+    content: "<?php\n$cfg['blowfish_secret'] = '{{ blowfish_secret.stdout }}';"
+    dest: /usr/local/etc/phpmyadmin/conf.d/blowfish_secret.inc.php
+    owner: root
+    group: www-data
+    mode: '0640'
+  when: blowfish_secret_file.stat.exists == False
+
 - template: src=mit-phpmyadmin.include dest=/etc/nginx/conf.d/mit-phpmyadmin.include
   notify: Restart nginx  
 
