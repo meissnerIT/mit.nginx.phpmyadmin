@@ -1,15 +1,25 @@
 ---
 
+- name: Copy config.inc.php (local)
+  become: no
+  local_action:
+    module: copy
+    src: config.inc.php
+    dest: "{{ role_path }}/files/phpMyAdmin-4.9.2-all-languages/"
+
 - name: rsync phpmyadmin
   synchronize:
-    src: files/phpMyAdmin-4.9.0.1-all-languages/
+    src: files/phpMyAdmin-4.9.2-all-languages/
     dest: /usr/local/share/phpmyadmin/
     owner: no
+    delete: yes
+    rsync_opts:
+      - "--exclude=setup/"
 
-- name: Create /usr/local/etc/phpmyadmin/conf.d/
-  file: state=directory path=/usr/local/etc/phpmyadmin/conf.d/
+- name: Create /etc/phpmyadmin/conf.d/
+  file: state=directory path=/etc/phpmyadmin/conf.d/
 
-- stat: path=/usr/local/etc/phpmyadmin/conf.d/blowfish_secret.inc.php
+- stat: path=/etc/phpmyadmin/conf.d/blowfish_secret.inc.php
   register: blowfish_secret_file
 
 - name: Create blowfish_secret
@@ -19,13 +29,16 @@
 
 - name: Create blowfish_secret.inc.php
   copy:
-    content: "<?php\n$cfg['blowfish_secret'] = '{{ blowfish_secret.stdout }}';"
-    dest: /usr/local/etc/phpmyadmin/conf.d/blowfish_secret.inc.php
+    content: "<?php\n$cfg['blowfish_secret'] = '{{ blowfish_secret.stdout }}';\n?>"
+    dest: /etc/phpmyadmin/conf.d/blowfish_secret.inc.php
     owner: root
     group: www-data
     mode: '0640'
   when: blowfish_secret_file.stat.exists == False
 
-- template: src=mit-phpmyadmin.include dest=/etc/nginx/conf.d/mit-phpmyadmin.include
-  notify: Restart nginx  
+- template: src={{ item }} dest=/etc/nginx/conf.d/
+  notify: Reload nginx
+  with_items:
+    - mit-phpmyadmin.include
+    - local-mit-phpmyadmin.include
 
