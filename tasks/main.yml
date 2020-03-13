@@ -1,15 +1,18 @@
 ---
 
+- set_fact:
+    phpmyadmin_version: 4.9.4
+
 - name: Copy config.inc.php (local)
   become: no
   local_action:
     module: copy
     src: config.inc.php
-    dest: "{{ role_path }}/files/phpMyAdmin-4.9.2-all-languages/"
+    dest: "{{ role_path }}/files/phpMyAdmin-{{ phpmyadmin_version }}-all-languages/"
 
 - name: rsync phpmyadmin
   synchronize:
-    src: files/phpMyAdmin-4.9.2-all-languages/
+    src: files/phpMyAdmin-{{ phpmyadmin_version }}-all-languages/
     dest: /usr/local/share/phpmyadmin/
     owner: no
     delete: yes
@@ -39,6 +42,11 @@
 - template: src={{ item }} dest=/etc/nginx/conf.d/
   notify: Reload nginx
   with_items:
-    - mit-phpmyadmin.include
     - local-mit-phpmyadmin.include
+
+- name: Check deprecated files
+  command: find /etc/nginx/conf.d/ -name mit-phpmyadmin.include
+  register: cmd_ls
+  failed_when: cmd_ls.stdout
+  changed_when: no
 

@@ -13,6 +13,11 @@
         alias /usr/local/share/phpmyadmin/$1;
     }
 
+    # https://docs.phpmyadmin.net/en/latest/setup.html#securing-your-phpmyadmin-installation
+    location ~ ^\/{{ mit_nginx_phpmyadmin_uri }}\/(libraries|templates)\/ {
+        deny all;
+    }
+
     location ~ ^/{{ mit_nginx_phpmyadmin_uri }}(.+\.php)$ {
         alias /usr/local/share/phpmyadmin$1;
         fastcgi_pass $fpm_fastcgi_pass;
