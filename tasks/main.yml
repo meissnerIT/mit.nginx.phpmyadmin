@@ -1,7 +1,7 @@
 ---
 
 - set_fact:
-    phpmyadmin_version: 4.9.5
+    phpmyadmin_version: 4.9.6
 
 - name: Copy config.inc.php (local)
   become: no
