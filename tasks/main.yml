@@ -35,7 +35,7 @@
     content: "<?php\n$cfg['blowfish_secret'] = '{{ blowfish_secret.stdout }}';\n?>"
     dest: /etc/phpmyadmin/conf.d/blowfish_secret.inc.php
     owner: root
-    group: www-data
+    group: phpmyadmin
     mode: '0640'
   when: blowfish_secret_file.stat.exists == False
 
