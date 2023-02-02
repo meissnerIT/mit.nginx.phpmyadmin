@@ -25,7 +25,7 @@
 - stat: path=/etc/phpmyadmin/conf.d/blowfish_secret.inc.php
   register: blowfish_secret_file
 
-- name: Create blowfish_secret
+- name: Create secret for blowfish_secret.inc.php
   shell: openssl rand -base64 32 | cut -b -32
   register: blowfish_secret
   when: blowfish_secret_file.stat.exists == False
@@ -39,10 +39,18 @@
     mode: '0640'
   when: blowfish_secret_file.stat.exists == False
 
-- template: src={{ item }} dest=/etc/nginx/conf.d/
+- name: Ensure access to blowfish_secret.inc.php
+  file:
+    path: /etc/phpmyadmin/conf.d/blowfish_secret.inc.php
+    owner: root
+    group: phpmyadmin
+    mode: '0640'
+
+- name: Create local-mit-phpmyadmin.include
+  template:
+    src: local-mit-phpmyadmin.include
+    dest: /etc/nginx/conf.d/
   notify: Reload nginx
-  with_items:
-    - local-mit-phpmyadmin.include
 
 - name: Check deprecated files
   command: find /etc/nginx/conf.d/ -name mit-phpmyadmin.include
