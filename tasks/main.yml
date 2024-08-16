@@ -1,7 +1,33 @@
 ---
 
 - set_fact:
-    phpmyadmin_version: 5.2.1
+    phpmyadmin_dir: phpMyAdmin-{{ phpmyadmin_version }}-all-languages
+    # ansible.builtin.unarchive needs gnu tar which isn't available on macOS
+    phpmyadmin_zip: phpMyAdmin-{{ phpmyadmin_version }}-all-languages.zip
+
+- name: Check if files/{{ phpmyadmin_dir }} exists
+  become: no
+  delegate_to: localhost
+  ansible.builtin.stat:
+    path: "{{ role_path }}/files/{{ phpmyadmin_dir }}"
+  register: phpmyadmin_dir_stat
+
+- name: Get local copy of {{ phpmyadmin_zip }}
+  become: no
+  delegate_to: localhost
+  ansible.builtin.get_url:
+    url: https://files.phpmyadmin.net/phpMyAdmin/{{ phpmyadmin_version }}/{{ phpmyadmin_zip }}
+    dest: files/{{ phpmyadmin_zip }}
+  when: not phpmyadmin_dir_stat.stat.exists
+
+- name: Extract {{ phpmyadmin_zip }}
+  become: no
+  delegate_to: localhost
+  ansible.builtin.unarchive:
+    src: files/{{ phpmyadmin_zip }}
+    dest: "{{ role_path }}/files"
+    creates: files/{{ phpmyadmin_dir }}
+  when: not phpmyadmin_dir_stat.stat.exists
 
 - name: Copy config.inc.php (local)
   become: no
