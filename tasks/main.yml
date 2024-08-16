@@ -17,14 +17,14 @@
   delegate_to: localhost
   ansible.builtin.get_url:
     url: https://files.phpmyadmin.net/phpMyAdmin/{{ phpmyadmin_version }}/{{ phpmyadmin_zip }}
-    dest: files/{{ phpmyadmin_zip }}
+    dest: "{{ role_path }}/files/{{ phpmyadmin_zip }}"
   when: not phpmyadmin_dir_stat.stat.exists
 
 - name: Extract {{ phpmyadmin_zip }}
   become: no
   delegate_to: localhost
   ansible.builtin.unarchive:
-    src: files/{{ phpmyadmin_zip }}
+    src: "{{ role_path }}/files/{{ phpmyadmin_zip }}"
     dest: "{{ role_path }}/files"
     creates: files/{{ phpmyadmin_dir }}
   when: not phpmyadmin_dir_stat.stat.exists
