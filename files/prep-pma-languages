@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# vim: ts=4 sw=4 noet ft=sh
+#
+# Fetch phpMyAdmin all-languages tarball.
+
+set -euo pipefail
+
+# shellcheck disable=2155
+declare -r BN=$(basename "$0")
+
+function die {
+	echo >&2 "$@"
+	exit 1
+}
+
+function usage {
+	die "Usage: $BN {phpMyAdmin-version}"
+}
+
+function main {
+	[[ $# -ge 1 ]] || usage
+	local ver=$1
+	pushd "$(dirname "$0")" >/dev/null
+	tball="phpMyAdmin-${ver}-all-languages.tar.gz"
+	url="https://files.phpmyadmin.net/phpMyAdmin/$ver/$tball"
+	if [[ ! -s $tball ]]; then
+		wget -O "$tball" -nd -q "$url"
+	fi
+	tar --no-same-owner --no-xattr -xzf "$tball"
+	popd >/dev/null
+}
+
+main "$@"

@@ -1,7 +1,9 @@
 # mit.nginx.phpmyadmin
 
+Before the role can be used, you need to execute the following once on the controller:
+
 ```
-cd files
-wget https://files.phpmyadmin.net/phpMyAdmin/4.9.7/phpMyAdmin-4.9.7-all-languages.tar.gz
+./files/prep-pma-languages 5.2.1
 ```
 
+Replace 5.2.1 with the desired phpMyAdmin version, as necessary.
